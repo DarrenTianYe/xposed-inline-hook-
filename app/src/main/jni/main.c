@@ -5,9 +5,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdbool.h>
-
 #include <stdlib.h>
-
 #include <stdio.h>
 #include <unistd.h>
 #include "include/inlineHook.h"

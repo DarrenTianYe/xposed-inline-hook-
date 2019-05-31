@@ -1,4 +1,4 @@
-package com.crack.cracktool;
+package com.xposed.inlinehook.test;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

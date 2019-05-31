@@ -4,13 +4,14 @@
 
 #include "include/inlineHook.h"
 #include "include/hooker.h"
+#include "include/utils.h"
 #include <sys/types.h>
 #include <dirent.h>
 
 
 int init_inlineHook_module(){
     int ret = inlineHook_opendir();
-
+    LOGD("inlineHook_opendir %d", ret);
     return ret;
 }
 
@@ -40,6 +41,9 @@ int inlineHook_opendir() {
     sOpenDirAdrr = dlsym(handle, "opendir");
     if (!sOpenDirAdrr) return -2;
     LOGD("address:%08X", (uint32_t) sOpenDirAdrr);
+
+    LOGD("JNI_OnLoad inlineHookTest:%x", old_opendir);
+
     int regRet = registerInlineHook((uint32_t) sOpenDirAdrr, (uint32_t) uu_hook_opendir,
                                     (uint32_t **) &old_opendir);
     if (ELE7EN_OK != regRet) {
@@ -51,6 +55,8 @@ int inlineHook_opendir() {
         LOGD("inlineHook 2 failed!");
         return regRet;
     }
+    utils_print_maps();
+
     return 0;
 }
 /***************opendir end *********/

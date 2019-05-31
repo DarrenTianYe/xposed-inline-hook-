@@ -1,4 +1,4 @@
-package com.crack.cracktool;
+package com.xposed.inlinehook.test;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;

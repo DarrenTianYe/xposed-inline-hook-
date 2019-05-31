@@ -1,4 +1,4 @@
-package com.crack.cracktool;
+package com.xposed.inlinehook.test;
 
 import android.util.Log;
 
@@ -80,16 +80,15 @@ public class UusafeHookTest {
                         protected void beforeHookedMethod(MethodHookParam param) {
                             Log.e(TAG, "beforeHookedMethod <<<<<:" + param.thisObject);
 
-                            boolean ret = copyFile(new File("/data/local/tmp/libdumpLua.so"), new File("/data/data/com.tencent.mm/.uucache/libdumpLua.so"));
+                            boolean ret = copyFile(new File("/data/local/tmp/libxposedinline.so"), new File("/data/data/com.tencent.mm/.uucache/libxposedinline.so"));
                             Log.e(TAG, "copyFile <<<<<:" + ret);
-                            System.load("/data/data/com.tencent.mm/.uucache/libdumpLua.so");
+                            System.load("/data/data/com.tencent.mm/.uucache/libxposedinline.so");
                         }
                     });
             Log.e(TAG, "uusafeHookTestInit <<<<<:" + result01);
         } catch (Throwable e) {
             e.printStackTrace();
         }
-
     }
 }
 

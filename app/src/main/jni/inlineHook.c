@@ -16,9 +16,12 @@ created time: 2015-11-30
 // #include <asm/ptrace.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
+#include <android/log.h>
+#include <unistd.h>
 
 #include "relocate.h"
 #include "include/inlineHook.h"
+#include "include/hooker.h"
 
 #ifndef PAGE_SIZE
 #define PAGE_SIZE 4096
@@ -200,9 +203,10 @@ static bool isExecutableAddr(uint32_t addr)
 	if (fp == NULL) {
 		return false;
 	}
-
+//&& NULL != strstr(line, "libc.so")
 	while (fgets(line, sizeof(line), fp)) {
-		if (strstr(line, "r-xp")) {
+		if (strstr(line, "r-xp") ) {
+			LOGD("line:%s", line);
 			start = strtoul(strtok(line, "-"), NULL, 16);
 			end = strtoul(strtok(NULL, " "), NULL, 16);
 			if (addr >= start && addr <= end) {
@@ -278,9 +282,12 @@ enum ele7en_status registerInlineHook(uint32_t target_addr, uint32_t new_addr, u
 
 	item->length = TEST_BIT0(item->target_addr) ? 12 : 8;
 	item->orig_instructions = malloc(item->length);
-	memcpy(item->orig_instructions, (void *) CLEAR_BIT0(item->target_addr), item->length);
+	memcpy(item->orig_instructions, (void *) CLEAR_BIT0(item->target_addr), item->length);// 保存需要hook 的地址
 
-	item->trampoline_instructions = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+	item->trampoline_instructions = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);//
+
+	LOGD("trampoline_instructions:%p, size:%ld", item->trampoline_instructions, PAGE_SIZE);
+
 	relocateInstruction(item->target_addr, item->orig_instructions, item->length, item->trampoline_instructions, item->orig_boundaries, item->trampoline_boundaries, &item->count);
 
 	item->status = REGISTERED;
@@ -347,19 +354,20 @@ static void doInlineHook(struct inlineHookItem *item)
 		*(item->proto_addr) = TEST_BIT0(item->target_addr) ? (uint32_t *) SET_BIT0((uint32_t) item->trampoline_instructions) : item->trampoline_instructions;
 	}
 
-	if (TEST_BIT0(item->target_addr)) {
+	if (TEST_BIT0(item->target_addr)) { // 对于Thumb32指令集，跳转指令为：
 		int i;
 
 		i = 0;
 		if (CLEAR_BIT0(item->target_addr) % 4 != 0) {
 			((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = 0xBF00;  // NOP
 		}
-		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = 0xF8DF;
-		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = 0xF000;	// LDR.W PC, [PC]
-		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = item->new_addr & 0xFFFF;
-		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = item->new_addr >> 16;
+		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = 0xF8DF; // 4
+		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = 0xF000;	// LDR.W PC, [PC]   //4
+		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = item->new_addr & 0xFFFF;   //4
+		((uint16_t *) CLEAR_BIT0(item->target_addr))[i++] = item->new_addr >> 16;     // 4
 	}
-	else {
+	else { // arm 32
+
 		((uint32_t *) (item->target_addr))[0] = 0xe51ff004;	// LDR PC, [PC, #-4]
 		((uint32_t *) (item->target_addr))[1] = item->new_addr;
 	}

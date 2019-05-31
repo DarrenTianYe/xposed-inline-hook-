@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.crack.cracktool">
+    package="com.xposed.inlinehook.test">
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -15,7 +15,7 @@
         android:allowBackup="true"
         android:debuggable="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="crackTool"
+        android:label="xposed_inline_hook"
         android:theme="@style/AppTheme"
         tools:ignore="HardcodedDebugMode">
         <activity android:name=".MainAcitity">

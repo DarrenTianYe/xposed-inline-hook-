@@ -1,9 +1,10 @@
-package com.crack.cracktool;
+package com.xposed.inlinehook.test;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+
 import java.io.File;
 import dalvik.system.PathClassLoader;
 import de.robv.android.xposed.IXposedHookLoadPackage;
